@@ -1,85 +1,62 @@
-# データ処理用モジュール
+# data_processor.py
 
 import pandas as pd
 from scipy.signal import welch
 import numpy as np
-import io
+import csv
 
 def is_numeric_start(text):
     """文字列が数値（科学表記含む）で始まっているかチェックするヘルパー関数"""
     try:
-        # 文字列の前後の空白を削除
         text = str(text).strip()
-        
-        # 空白または空文字列は数値ではない
         if not text:
             return False
-            
-        # 負号、正号、または数字で始まっていれば、数値の可能性が高い
-        if text.startswith(('-', '+')) or text[0].isdigit():
-            # 試しにfloatに変換し、エラーがなければTrue
-            float(text)
-            return True
-        return False
+        
+        float(text)
+        return True
     except ValueError:
         return False
 
 def load_csv_data(file_path):
     """
-    CSVファイルを読み込み、数値データが始まる行の1つ上をヘッダーとして特定し、高速に読み込む。
-    
-    Args:
-        file_path (str): CSVファイルのパス
-
-    Returns:
-        tuple: (pd.DataFrame, float) クリーンなデータとサンプリングレート
+    CSVファイルを読み込み、ヘッダーを特定し、非数値データを含む行を削除する。
     """
     try:
-        # 1. ヘッダー行のインデックスを特定する
+        # 1. ヘッダー行のインデックスを特定
         header_row_index = 0
         
-        # ファイル全体を一行ずつ読み込む (メタデータの特定のみに使うため高速)
         with open(file_path, 'r', encoding='utf-8') as f:
             for i, line in enumerate(f):
-                # 最初の列（時間データ）の値を取得
                 first_cell = line.strip().split(',')[0].strip()
                 
                 # 最初のセルが数値で始まっていたら、データ行の開始と判断
                 if is_numeric_start(first_cell):
-                    # データが始まる行の1つ上をヘッダーとして設定
                     header_row_index = i - 1
                     break
-                # ヘッダーが見つからなかった場合（最終的にheader=0になる）
                 header_row_index = i 
                 
-        # 2. 正しいヘッダー行を指定してファイルをPandasで高速に再読み込み
-        # header_row_indexが-1以下になる場合は0行目から読み込み
+        # 2. 正しいヘッダー行を指定してPandasで高速に再読み込み
         if header_row_index < 0:
             header_row_index = 0
             
-        # on_bad_lines='skip'で、誤った行があっても無視させる
         df = pd.read_csv(file_path, header=header_row_index, comment='%', on_bad_lines='skip')
-
-        # 列名の前後の空白を削除
         df.columns = df.columns.str.strip()
         
-        # 3. データクレンジングと型変換 (高速処理)
+        # 3. データクレンジングと型変換
         
-        # すべての列に対して、非数値データをNaNに変換
+        # すべての列を数値に変換し、変換できない値をNaNとする
         for col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
 
-        # 時間列を含め、一つでもNaNがある行を削除
-        # これがあなたのアイデア「全部数値になったら」を高速に実行する部分です
+        # 一つでもNaNがある行を削除
         data_columns_including_time = df.columns
-        df.dropna(subset=data_columns_including_time, how='any', inplace=True) # how='any'で一つでもNaNがあれば削除
+        df.dropna(subset=data_columns_including_time, how='any', inplace=True) 
 
         if df.empty or len(df) < 2:
             print("Warning: No valid numeric data rows were found or data is too short.")
             return None, None
         
         # 4. サンプリングレートの計算
-        
         time_column = df.columns[0]
         time_data = df[time_column].values
 
@@ -92,11 +69,31 @@ def load_csv_data(file_path):
         print(f"Error loading CSV file: {e}")
         return None, None
 
-def compute_psd(data, sampling_rate):
-    """Welch法により、与えられたデータからsqrt(PSD)を計算する"""
-    if sampling_rate <= 0:
+def compute_psd(data, sampling_rate, smoothing_level=1):
+    """
+    Welch法により、smoothing_levelに基づいてnpersegを対数空間で決定し、sqrt(PSD)を計算する。
+    smoothing_level=1でnperseg=データ長の50%、smoothing_level=10でnperseg=256。
+    スライダー値の変化に対して視覚的な変化量が均一になるように対数補間する。
+    """
+    if sampling_rate <= 0 or len(data) < 2:
         return np.array([]), np.array([])
-        
-    frequencies, psd = welch(data, fs=sampling_rate, nperseg=len(data))
+
+    data_length = len(data)
+    nperseg_max = max(512, int(data_length * 0.5))
+    nperseg_min = 512
+
+    # smoothing_level: 1 (Low, max) ～ 10 (High, min)
+    # 対数空間で補間
+    log_max = np.log10(nperseg_max)
+    log_min = np.log10(nperseg_min)
+    alpha = (smoothing_level - 1) / 9  # 0～1
+    log_nperseg = log_max + (log_min - log_max) * alpha
+    nperseg_value = int(10 ** log_nperseg)
+    nperseg_value = max(nperseg_min, min(nperseg_max, nperseg_value))
+    nperseg_value = int(nperseg_value // 2 * 2)  # 偶数にする
+    if nperseg_value == 0:
+        nperseg_value = data_length
+
+    frequencies, psd = welch(data, fs=sampling_rate, nperseg=nperseg_value)
     sqrt_psd = np.sqrt(psd)
     return frequencies, sqrt_psd

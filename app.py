@@ -17,10 +17,23 @@ class App(QMainWindow):
         self.setCentralWidget(self.ui)
         self.setGeometry(100, 100, 1200, 600)
         self.setWindowTitle("PRISM - Data Visualizer")
+
         self.df = None
         self.sampling_rate = 0
+
+        self.current_smoothing_level = 1
+
         self.ui.browse_button.clicked.connect(self.browse_file)
         self.ui.channel_combo_box.currentIndexChanged.connect(self.plot_selected_channel)
+
+        self.ui.avg_slider.valueChanged.connect(self.update_smoothing_level)
+
+    def update_smoothing_level(self, value):
+        """スライドバーの値が変更されたときに呼び出される"""
+        self.current_smoothing_level = value
+
+        if self.df is not None:
+            self.plot_selected_channel()
         
     def browse_file(self):
         """ファイルダイアログを開き、CSVファイルを選択する"""
@@ -57,20 +70,26 @@ class App(QMainWindow):
         """時系列データをMatplotlibでプロットする"""
         ax = self.ui.time_series_axes
         canvas = self.ui.time_series_canvas
+        figure = self.ui.time_series_figure
         ax.clear() 
         ax.plot(time_data, signal_data, color='blue')
         self.ui.setup_axes(ax, "Time Series Plot", "Time [s]", "Amplitude", log_mode=False)
+        figure.tight_layout()
         canvas.draw()
         
     def plot_psd(self, data):
         """PSDをMatplotlibでプロットする"""
         ax = self.ui.psd_axes
         canvas = self.ui.psd_canvas
-        frequencies, psd = compute_psd(data, self.sampling_rate)
+        figure = self.ui.psd_figure
+
+        frequencies, psd = compute_psd(data, self.sampling_rate, self.current_smoothing_level)
+
         ax.clear()
         if len(frequencies) > 0 and len(psd) > 0:
             ax.plot(frequencies, psd, color='blue')
         self.ui.setup_axes(ax, "Amplitude Spectral Density", "Frequency [Hz]", "ASD", log_mode=True)
+        figure.tight_layout()
         canvas.draw()
 
 if __name__ == '__main__':
