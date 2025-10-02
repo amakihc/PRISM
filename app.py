@@ -17,6 +17,7 @@ class App(QMainWindow):
         self.setCentralWidget(self.ui)
         self.setGeometry(100, 100, 1200, 600)
         self.setWindowTitle("PRISM - Data Visualizer")
+
         self.df = None
         self.sampling_rate = 0
 

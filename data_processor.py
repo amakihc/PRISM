@@ -1,4 +1,4 @@
-# データ処理用モジュール
+# data_processor.py
 
 import pandas as pd
 from scipy.signal import welch
