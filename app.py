@@ -1,4 +1,4 @@
-# app.py
+# アプリケーションのメインモジュール
 
 import matplotlib
 matplotlib.use('QtAgg') # MatplotlibをQt環境で安定動作させる設定
@@ -10,27 +10,20 @@ import sys
 import numpy as np
 
 class App(QMainWindow):
-    """
-    アプリケーションのメインウィンドウクラス
-    """
+    """アプリケーションのメインウィンドウクラス"""
     def __init__(self):
         super().__init__()
         self.ui = UILayout()
         self.setCentralWidget(self.ui)
         self.setGeometry(100, 100, 1200, 600)
         self.setWindowTitle("PRISM - Data Visualizer")
-
         self.df = None
         self.sampling_rate = 0
-        
-        # UIコンポーネントを接続
         self.ui.browse_button.clicked.connect(self.browse_file)
         self.ui.channel_combo_box.currentIndexChanged.connect(self.plot_selected_channel)
         
     def browse_file(self):
-        """
-        ファイルダイアログを開き、CSVファイルを選択する
-        """
+        """ファイルダイアログを開き、CSVファイルを選択する"""
         file_path, _ = QFileDialog.getOpenFileName(
             self, "CSVファイルを選択", "", "CSV Files (*.csv)"
         )
@@ -39,71 +32,46 @@ class App(QMainWindow):
             self.process_file(file_path)
 
     def process_file(self, file_path):
-        """
-        ファイルを処理し、ドロップダウンリストを更新する
-        """
+        """ファイルを処理し、ドロップダウンリストを更新する"""
         self.df, self.sampling_rate = load_csv_data(file_path)
         if self.df is None or self.df.empty:
             return
-
         self.ui.channel_combo_box.clear()
-        
         num_columns = len(self.df.columns)
-        channel_names = [f"列 {i+1}" for i in range(1, num_columns)]
+        channel_names = [f"Column {i}" for i in range(1, num_columns)]
         self.ui.channel_combo_box.addItems(channel_names)
-
         self.plot_selected_channel()
     
     def plot_selected_channel(self):
-        """
-        ドロップダウンリストで選択されたチャンネルのデータをプロットする
-        """
+        """ドロップダウンリストで選択されたチャンネルのデータをプロットする"""
         selected_index = self.ui.channel_combo_box.currentIndex()
-        
         if selected_index < 0 or self.df is None:
             return
-
         data_column_index = selected_index + 1
-        
         signal_data = self.df.iloc[:, data_column_index].values
         time_data = self.df.iloc[:, 0].values
-
         self.plot_time_series(time_data, signal_data)
         self.plot_psd(signal_data)
         
     def plot_time_series(self, time_data, signal_data):
-        """
-        時系列データをMatplotlibでプロットする
-        """
+        """時系列データをMatplotlibでプロットする"""
         ax = self.ui.time_series_axes
         canvas = self.ui.time_series_canvas
-        
         ax.clear() 
         ax.plot(time_data, signal_data, color='blue')
-        
-        # 軸設定を再適用
         self.ui.setup_axes(ax, "Time Series Plot", "Time [s]", "Amplitude", log_mode=False)
-        
         canvas.draw()
         
     def plot_psd(self, data):
-        """
-        PSDをMatplotlibでプロットする
-        """
+        """PSDをMatplotlibでプロットする"""
         ax = self.ui.psd_axes
         canvas = self.ui.psd_canvas
-        
         frequencies, psd = compute_psd(data, self.sampling_rate)
-        
         ax.clear()
         if len(frequencies) > 0 and len(psd) > 0:
             ax.plot(frequencies, psd, color='blue')
-        
-        # 軸設定を再適用
         self.ui.setup_axes(ax, "Amplitude Spectral Density", "Frequency [Hz]", "ASD", log_mode=True)
-            
         canvas.draw()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
