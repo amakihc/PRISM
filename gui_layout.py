@@ -1,8 +1,9 @@
-# gui_layout.py
+# GUIレイアウト構築用モジュール
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QComboBox, QSizePolicy
 from PyQt5.QtGui import QFont
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
 class UILayout(QWidget):
@@ -40,17 +41,19 @@ class UILayout(QWidget):
         # グラフウィジェットの作成 (Matplotlib FigureCanvas)
         self.font_size = 20
         
-        # 時系列プロットのFigureとAxes
+        # 時系列プロット
         self.time_series_figure = Figure(figsize=(5, 4), facecolor='white')
         self.time_series_canvas = FigureCanvas(self.time_series_figure)
         self.time_series_axes = self.time_series_figure.add_subplot(111)
         self.setup_axes(self.time_series_axes, "Time Series Plot", "Time [s]", "Amplitude", log_mode=False)
+        self.time_series_toolbar = NavigationToolbar(self.time_series_canvas, self)
         
-        # PSDプロットのFigureとAxes
+        # PSDプロット
         self.psd_figure = Figure(figsize=(5, 4), facecolor='white')
         self.psd_canvas = FigureCanvas(self.psd_figure)
         self.psd_axes = self.psd_figure.add_subplot(111)
         self.setup_axes(self.psd_axes, "Amplitude Spectral Density", "Frequency [Hz]", "ASD", log_mode=True)
+        self.psd_toolbar = NavigationToolbar(self.psd_canvas, self)
         
         # Figureの余白調整
         self.time_series_figure.tight_layout()
@@ -93,17 +96,29 @@ class UILayout(QWidget):
         # 最上部のコントロールバーレイアウト
         top_layout = QHBoxLayout()
         
-        # PRISMロゴ (固定幅)
+        # PRISMロゴ
         top_layout.addWidget(self.app_title_label, 0) 
         
-        # ファイル選択とチャンネル選択 (残りのスペースを1:1で分割)
+        # ファイル選択とチャンネル選択
         top_layout.addWidget(file_selection_widget, 1) 
         top_layout.addWidget(channel_selection_widget, 1) 
         
         # グラフエリアのレイアウト
+        
+        # 1. 時系列プロットの垂直レイアウト
+        time_series_vlayout = QVBoxLayout()
+        time_series_vlayout.addWidget(self.time_series_toolbar) 
+        time_series_vlayout.addWidget(self.time_series_canvas) 
+        
+        # 2. PSDプロットの垂直レイアウト
+        psd_vlayout = QVBoxLayout()
+        psd_vlayout.addWidget(self.psd_toolbar) 
+        psd_vlayout.addWidget(self.psd_canvas) 
+
+        # グラフ全体を左右に並べる水平レイアウト
         graph_layout = QHBoxLayout()
-        graph_layout.addWidget(self.time_series_canvas)
-        graph_layout.addWidget(self.psd_canvas)
+        graph_layout.addLayout(time_series_vlayout) 
+        graph_layout.addLayout(psd_vlayout) 
 
         # メインレイアウトに垂直に配置
         self.main_layout.addLayout(top_layout)
