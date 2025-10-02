@@ -1,7 +1,9 @@
 # GUIレイアウト構築用モジュール
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QComboBox, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QComboBox, QSizePolicy, QSlider
 from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt 
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -19,12 +21,20 @@ class UILayout(QWidget):
 
     def create_widgets(self):
         """UIコンポーネントの作成と初期設定"""
-        # アプリケーション名ラベル
+        # アプリケーション名ラベル (PRISM)
         self.app_title_label = QLabel("PRISM")
         self.app_title_label.setFixedWidth(150) 
         title_font = QFont("Helvetica", 24, QFont.Bold)
         self.app_title_label.setFont(title_font)
         self.app_title_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        self.app_title_label.setText(
+            "<span style='color: #3498DB;'>P</span>" # 鮮やかな青
+            "<span style='color: #2ECC71;'>R</span>" # 緑
+            "<span style='color: #F39C12;'>I</span>" # オレンジ
+            "<span style='color: #E74C3C;'>S</span>" # 赤
+            "<span style='color: #9B59B6;'>M</span>" # 紫
+        )
 
         # ファイル選択ボタンとラベル
         self.browse_button = QPushButton("Select CSV File")
@@ -38,8 +48,22 @@ class UILayout(QWidget):
         self.channel_combo_box = QComboBox()
         self.channel_combo_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        # グラフウィジェットの作成 (Matplotlib FigureCanvas)
-        self.font_size = 20
+        self.avg_main_label = QLabel("Averaging:")
+        self.avg_main_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        # 平均化コントロール（スライドバーと固定ラベル）
+        self.avg_slider = QSlider(Qt.Horizontal)
+        self.avg_slider.setRange(1, 10) 
+        self.avg_slider.setValue(1)
+        self.avg_slider.setFixedWidth(120)
+        self.avg_slider.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        
+        # スライダーの両端に固定表示するラベル
+        self.avg_low_label = QLabel("Low") # 1側は Low Smoothing
+        self.avg_high_label = QLabel("High") # 10側は High Smoothing
+
+        # グラフウィジェットの作成
+        self.font_size = 14
         
         # 時系列プロット
         self.time_series_figure = Figure(figsize=(5, 4), facecolor='white')
@@ -55,7 +79,7 @@ class UILayout(QWidget):
         self.setup_axes(self.psd_axes, "Amplitude Spectral Density", "Frequency [Hz]", "ASD", log_mode=True)
         self.psd_toolbar = NavigationToolbar(self.psd_canvas, self)
         
-        # Figureの余白調整
+        # Figureの余白調整（初期設定）
         self.time_series_figure.tight_layout()
         self.psd_figure.tight_layout()
 
@@ -93,33 +117,42 @@ class UILayout(QWidget):
         channel_selection_widget.setLayout(channel_selection_layout)
         channel_selection_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed) 
 
-        # 最上部のコントロールバーレイアウト
+        # 平均化コントロールのレイアウト (右寄せ)
+        avg_control_layout = QHBoxLayout()
+        avg_control_layout.addWidget(self.avg_main_label, 0)
+        avg_control_layout.addWidget(self.avg_low_label, 0)
+        avg_control_layout.addWidget(self.avg_slider, 0)
+        avg_control_layout.addWidget(self.avg_high_label, 0)
+        
+        avg_control_widget = QWidget()
+        avg_control_widget.setLayout(avg_control_layout)
+        avg_control_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed) 
+
+        # --- 1行目: PRISM + ファイル選択 + チャンネル選択 ---
         top_layout = QHBoxLayout()
-        
-        # PRISMロゴ
         top_layout.addWidget(self.app_title_label, 0) 
-        
-        # ファイル選択とチャンネル選択
         top_layout.addWidget(file_selection_widget, 1) 
         top_layout.addWidget(channel_selection_widget, 1) 
         
+        # --- 2行目: 平均化コントロール (右寄せ) ---
+        mid_layout = QHBoxLayout()
+        mid_layout.addStretch() # 左側の伸縮スペース (右寄せを実現)
+        mid_layout.addWidget(avg_control_widget) 
+
         # グラフエリアのレイアウト
-        
-        # 1. 時系列プロットの垂直レイアウト
         time_series_vlayout = QVBoxLayout()
         time_series_vlayout.addWidget(self.time_series_toolbar) 
         time_series_vlayout.addWidget(self.time_series_canvas) 
         
-        # 2. PSDプロットの垂直レイアウト
         psd_vlayout = QVBoxLayout()
         psd_vlayout.addWidget(self.psd_toolbar) 
         psd_vlayout.addWidget(self.psd_canvas) 
 
-        # グラフ全体を左右に並べる水平レイアウト
         graph_layout = QHBoxLayout()
         graph_layout.addLayout(time_series_vlayout) 
         graph_layout.addLayout(psd_vlayout) 
 
-        # メインレイアウトに垂直に配置
+        # メインレイアウトに垂直に配置 (1行目 -> 2行目 -> 3行目)
         self.main_layout.addLayout(top_layout)
+        self.main_layout.addLayout(mid_layout)
         self.main_layout.addLayout(graph_layout)
