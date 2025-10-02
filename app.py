@@ -1,12 +1,17 @@
 # アプリケーションのメインモジュール
 
 import matplotlib
-matplotlib.use('QtAgg') # MatplotlibをQt環境で安定動作させる設定
+matplotlib.use('QtAgg')
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+
 from gui_layout import UILayout
 from data_processor import load_csv_data, compute_psd
-import sys
 import numpy as np
 
 class App(QMainWindow):
