@@ -48,19 +48,18 @@ class UILayout(QWidget):
         self.channel_combo_box = QComboBox()
         self.channel_combo_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        # 平均化スライダーとラベル
         self.avg_main_label = QLabel("Averaging:")
         self.avg_main_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-
-        # 平均化コントロール（スライドバーと固定ラベル）
         self.avg_slider = QSlider(Qt.Horizontal)
-        self.avg_slider.setRange(1, 10) 
+        self.avg_slider.setRange(1, 10)
         self.avg_slider.setValue(1)
         self.avg_slider.setFixedWidth(120)
         self.avg_slider.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         
         # スライダーの両端に固定表示するラベル
-        self.avg_low_label = QLabel("Low") # 1側は Low Smoothing
-        self.avg_high_label = QLabel("High") # 10側は High Smoothing
+        self.avg_low_label = QLabel("Low")
+        self.avg_high_label = QLabel("High")
 
         # グラフウィジェットの作成
         self.font_size = 14
@@ -128,17 +127,13 @@ class UILayout(QWidget):
         avg_control_widget.setLayout(avg_control_layout)
         avg_control_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed) 
 
-        # --- 1行目: PRISM + ファイル選択 + チャンネル選択 ---
+        # 上部エリアのレイアウト (左:アプリ名, 中:ファイル選択, 右:チャンネル選択)
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.app_title_label, 0) 
         top_layout.addWidget(file_selection_widget, 1) 
-        top_layout.addWidget(channel_selection_widget, 1) 
+        top_layout.addWidget(channel_selection_widget, 1)
+        top_layout.addWidget(avg_control_widget, 0)
         
-        # --- 2行目: 平均化コントロール (右寄せ) ---
-        mid_layout = QHBoxLayout()
-        mid_layout.addStretch() # 左側の伸縮スペース (右寄せを実現)
-        mid_layout.addWidget(avg_control_widget) 
-
         # グラフエリアのレイアウト
         time_series_vlayout = QVBoxLayout()
         time_series_vlayout.addWidget(self.time_series_toolbar) 
@@ -152,7 +147,5 @@ class UILayout(QWidget):
         graph_layout.addLayout(time_series_vlayout) 
         graph_layout.addLayout(psd_vlayout) 
 
-        # メインレイアウトに垂直に配置 (1行目 -> 2行目 -> 3行目)
         self.main_layout.addLayout(top_layout)
-        self.main_layout.addLayout(mid_layout)
         self.main_layout.addLayout(graph_layout)
