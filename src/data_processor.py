@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.signal import welch
 import numpy as np
 import csv
+import statsmodels.api as sm
 
 def is_numeric_start(text):
     """文字列が数値（科学表記含む）で始まっているかチェックするヘルパー関数"""
@@ -97,3 +98,22 @@ def compute_psd(data, sampling_rate, smoothing_level=1):
     frequencies, psd = welch(data, fs=sampling_rate, nperseg=nperseg_value)
     sqrt_psd = np.sqrt(psd)
     return frequencies, sqrt_psd
+
+def compute_autocorrelation(data):
+    """
+    データからコレログラム計算する。
+
+    Args:
+        data (np.ndarray): 入力データ配列
+
+    Returns:
+        tuple: (lags, autocorr) - ラグと自己相関のタプル
+    """
+
+    data_mean_subtracted = data - np.mean(data)
+
+    autocorr = sm.tsa.acf(data_mean_subtracted, nlags=None, fft=True)
+
+    lags = np.arange(len(autocorr))
+
+    return lags, autocorr

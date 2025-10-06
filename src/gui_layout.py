@@ -2,7 +2,7 @@
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QComboBox, QSizePolicy, QSlider
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt 
+from PyQt5.QtCore import Qt
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -61,6 +61,11 @@ class UILayout(QWidget):
         self.avg_low_label = QLabel("Low")
         self.avg_high_label = QLabel("High")
 
+        # コレログラムボタン
+        self.advanced_button = QPushButton("Advanced")
+        self.advanced_button.setFixedWidth(80)
+        self.advanced_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
         # グラフウィジェットの作成
         self.font_size = 14
         
@@ -116,18 +121,20 @@ class UILayout(QWidget):
         channel_selection_widget.setLayout(channel_selection_layout)
         channel_selection_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed) 
 
-        # 平均化コントロールのレイアウト (右寄せ)
+        # 平均化コントロールのレイアウト
         avg_control_layout = QHBoxLayout()
         avg_control_layout.addWidget(self.avg_main_label, 0)
         avg_control_layout.addWidget(self.avg_low_label, 0)
         avg_control_layout.addWidget(self.avg_slider, 0)
         avg_control_layout.addWidget(self.avg_high_label, 0)
+
+        avg_control_layout.addWidget(self.advanced_button, 0)
         
         avg_control_widget = QWidget()
         avg_control_widget.setLayout(avg_control_layout)
         avg_control_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed) 
 
-        # 上部エリアのレイアウト (左:アプリ名, 中:ファイル選択, 右:チャンネル選択)
+        # 上部エリアのレイアウト
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.app_title_label, 0) 
         top_layout.addWidget(file_selection_widget, 1) 

@@ -3,7 +3,8 @@
 import matplotlib
 matplotlib.use('QtAgg')
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QVBoxLayout, QLabel, QPushButton
+from PyQt5.QtCore import Qt
 
 import sys
 import os
@@ -11,8 +12,51 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from gui_layout import UILayout
-from data_processor import load_csv_data, compute_psd
+from data_processor import load_csv_data, compute_psd, compute_autocorrelation
 import numpy as np
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
+class AdvancedWindow(QDialog):
+    def __init__(self, parent=None, signal_data=None):
+        super().__init__(parent)
+        self.setWindowTitle("Advanced Analysis")
+        self.setWindowModality(Qt.ApplicationModal)
+        self.signal_data = signal_data
+
+        main_layout = QVBoxLayout(self)
+
+        self.figure = Figure(figsize=(8, 6), facecolor='white')
+        self.canvas = FigureCanvas(self.figure)
+        main_layout.addWidget(self.canvas)
+
+        self.plot_correlogram()
+
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(self.accept)
+        main_layout.addWidget(close_button)
+
+    def plot_correlogram(self):
+        """コレログラムを計算してプロットする"""
+        if self.signal_data is None or len(self.signal_data) == 0:
+            return
+        
+        ax = self.figure.add_subplot(111)
+
+        max_lags = min(10000, len(self.signal_data))
+
+        lags, autocorr = compute_autocorrelation(self.signal_data[:max_lags])
+
+        ax.clear()
+        ax.plot(lags, autocorr, color='red')
+
+        ax.set_title("Correlogram", fontsize=14)
+        ax.set_xlabel("Lag", fontsize=12)
+        ax.set_ylabel("Autocorrelation", fontsize=12)
+        ax.grid(True, alpha=0.5)
+        self.figure.tight_layout()
+        self.canvas.draw()
 
 class App(QMainWindow):
     """アプリケーションのメインウィンドウクラス"""
@@ -32,6 +76,8 @@ class App(QMainWindow):
         self.ui.channel_combo_box.currentIndexChanged.connect(self.plot_selected_channel)
 
         self.ui.avg_slider.valueChanged.connect(self.update_smoothing_level)
+
+        self.ui.advanced_button.clicked.connect(self.show_advanced_window)
 
     def update_smoothing_level(self, value):
         """スライドバーの値が変更されたときに呼び出される"""
@@ -96,6 +142,17 @@ class App(QMainWindow):
         self.ui.setup_axes(ax, "Amplitude Spectral Density", "Frequency [Hz]", "ASD", log_mode=True)
         figure.tight_layout()
         canvas.draw()
+
+    def show_advanced_window(self):
+        """高度な分析ウィンドウを表示する"""
+        selected_index = self.ui.channel_combo_box.currentIndex()
+        if selected_index < 0 or self.df is None:
+            return
+        data_column_index = selected_index + 1
+        signal_data = self.df.iloc[:, data_column_index].values
+
+        advanced_window = AdvancedWindow(self, signal_data=signal_data)
+        advanced_window.exec_()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
