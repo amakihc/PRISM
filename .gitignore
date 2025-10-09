@@ -1,0 +1,24 @@
+# --- OS generated files ---
+.DS_Store          # macOS files
+Thumbs.db          # Windows thumbnail cache
+
+# --- Python Environment & Build ---
+__pycache__/       # Python compiled bytecode (cached files)
+src/__pycache__/   # Python compiled bytecode in src directory
+*.pyc              # Compiled Python files
+*.pyd
+*.so
+.env               # Virtual environment files (if named .env)
+venv/              # Virtual environment directories (common name)
+env/               # Virtual environment directories (common name)
+pip-log.txt
+dist/              # Distribution packaging
+build/             # Build directory
+
+# --- IDE and Editor Files ---
+.vscode/           # Visual Studio Code settings (Essential for you!)
+.idea/             # JetBrains IDEs (PyCharm, IntelliJ)
+
+# --- Data and Output ---
+*.log
+*.sqlite
