@@ -4,6 +4,7 @@ Thumbs.db          # Windows thumbnail cache
 
 # --- Python Environment & Build ---
 __pycache__/       # Python compiled bytecode (cached files)
+src/__pycache__/   # Python compiled bytecode in src directory
 *.pyc              # Compiled Python files
 *.pyd
 *.so
