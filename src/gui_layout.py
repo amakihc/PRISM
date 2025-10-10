@@ -50,10 +50,10 @@ class UILayout(QWidget):
 
         # ローパスフィルタースライダーとラベル
         self.lpf_label = QLabel("Cutoff Frequency:")
-        self.lpf_value_label = QLabel("")
+        self.lpf_value_label = QLabel("OFF")
         self.lpf_slider = QSlider(Qt.Horizontal)
         self.lpf_slider.setRange(1, 10)
-        self.lpf_slider.setValue(10)
+        self.lpf_slider.setValue(1)
         self.lpf_slider.setFixedWidth(120)
         self.lpf_slider.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
@@ -128,8 +128,8 @@ class UILayout(QWidget):
         # ローパスフィルタースライダーのレイアウト
         lpf_control_layout = QHBoxLayout()
         lpf_control_layout.addWidget(self.lpf_label, 0)
-        lpf_control_layout.addWidget(self.lpf_slider, 0)
         lpf_control_layout.addWidget(self.lpf_value_label, 0)
+        lpf_control_layout.addWidget(self.lpf_slider, 0)
         lpf_control_widget = QWidget()
         lpf_control_widget.setLayout(lpf_control_layout)
         lpf_control_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -150,6 +150,7 @@ class UILayout(QWidget):
         top_layout.addWidget(self.app_title_label, 0) 
         top_layout.addWidget(file_selection_widget, 1) 
         top_layout.addWidget(channel_selection_widget, 1)
+        top_layout.addWidget(lpf_control_widget, 0)
         top_layout.addWidget(avg_control_widget, 0)
         
         # グラフエリアのレイアウト
