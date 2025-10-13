@@ -58,7 +58,7 @@ class App(QMainWindow):
             return
         self.ui.channel_combo_box.clear()
         num_columns = len(self.df.columns)
-        channel_names = [f"Column {i}" for i in range(1, num_columns)]
+        channel_names = [f"{i}" for i in range(1, num_columns)]
         self.ui.channel_combo_box.addItems(channel_names)
         self.plot_selected_channel()
     
