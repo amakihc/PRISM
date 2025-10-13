@@ -4,6 +4,7 @@ import matplotlib
 matplotlib.use('QtAgg')
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PyQt5.QtGui import QIcon
 
 import sys
 import os
@@ -21,7 +22,13 @@ class App(QMainWindow):
         self.ui = UILayout()
         self.setCentralWidget(self.ui)
         self.setGeometry(100, 100, 1200, 600)
-        self.setWindowTitle("PRISM - Data Visualizer")
+        self.setWindowTitle("PRISM")
+
+        icon_path = os.path.join(os.path.dirname(__file__), 'src', 'icons', 'PRISM_App_Icon.png')
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
+        else:
+            print("Icon file not found. Continuing without custom icon.")
 
         self.df = None
         self.sampling_rate = 0
