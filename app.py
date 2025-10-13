@@ -11,7 +11,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from gui_layout import UILayout
-from data_processor import load_csv_data, compute_psd
+from data_processor import load_csv_data, compute_psd, apply_lpf
 import numpy as np
 
 class App(QMainWindow):
@@ -27,10 +27,12 @@ class App(QMainWindow):
         self.sampling_rate = 0
 
         self.current_smoothing_level = 1
+        self.current_lpf_level = 1
 
         self.ui.browse_button.clicked.connect(self.browse_file)
         self.ui.channel_combo_box.currentIndexChanged.connect(self.plot_selected_channel)
 
+        self.ui.lpf_slider.valueChanged.connect(self.update_lpf_cutoff)
         self.ui.avg_slider.valueChanged.connect(self.update_smoothing_level)
 
     def update_smoothing_level(self, value):
@@ -61,15 +63,30 @@ class App(QMainWindow):
         self.plot_selected_channel()
     
     def plot_selected_channel(self):
-        """ドロップダウンリストで選択されたチャンネルのデータをプロットする"""
+        """ドロップダウンリストで選択されたチャンネルのデータをフィルタリングし、プロットする"""
         selected_index = self.ui.channel_combo_box.currentIndex()
         if selected_index < 0 or self.df is None:
             return
+            
         data_column_index = selected_index + 1
-        signal_data = self.df.iloc[:, data_column_index].values
+        
+        # 生データと時間データを取得
+        raw_signal_data = self.df.iloc[:, data_column_index].values
         time_data = self.df.iloc[:, 0].values
+
+        # --- LPFフィルタリングの適用 ---
+        lpf_level = self.current_lpf_level
+        
+        if lpf_level != 1: # スライダーがOFF(1)でなければフィルタ適用
+            # apply_lpf は内部でアナログフィルタ設計とバイリニア変換を実行
+            signal_data = apply_lpf(raw_signal_data, self.sampling_rate, lpf_level)
+        else:
+            # フィルタOFFの場合は生データをそのまま使用
+            signal_data = raw_signal_data
+        
+        # フィルタリング後のデータでプロットを更新
         self.plot_time_series(time_data, signal_data)
-        self.plot_psd(signal_data)
+        self.plot_psd(signal_data) # フィルタリングされたデータでPSDも計算
         
     def plot_time_series(self, time_data, signal_data):
         """時系列データをMatplotlibでプロットする"""
@@ -96,6 +113,13 @@ class App(QMainWindow):
         self.ui.setup_axes(ax, "Amplitude Spectral Density", "Frequency [Hz]", "ASD", log_mode=True)
         figure.tight_layout()
         canvas.draw()
+        
+    def update_lpf_cutoff(self, value):
+        """"LPFスライダーの値が変更されたときにプロットを再描画"""
+        self.current_lpf_level = value
+        if self.df is not None:
+            self.plot_selected_channel()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

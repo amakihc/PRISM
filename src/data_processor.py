@@ -1,7 +1,7 @@
 # データ処理モジュール
 
 import pandas as pd
-from scipy.signal import welch
+from scipy.signal import welch, butter, filtfilt, bilinear
 import numpy as np
 import csv
 import io
@@ -98,3 +98,41 @@ def compute_psd(data, sampling_rate, smoothing_level=1):
     frequencies, psd = welch(data, fs=sampling_rate, nperseg=nperseg_value)
     sqrt_psd = np.sqrt(psd)
     return frequencies, sqrt_psd
+
+def apply_lpf(data, sampling_rate, lpf_level):
+    """バターワースローパスフィルタを適用する"""
+    # 1. フィルタOFFの判定
+    if lpf_level == 1 or sampling_rate == 0:
+        return data
+        
+    nyquist = sampling_rate / 2
+    
+    # 2. LPFレベルからカットオフ周波数 (cutoff_freq) を決定する
+    
+    # LPF OFF(1)はスキップ済み。スライダー値 2〜10 を 0〜1 の範囲に正規化
+    normalized_value = (lpf_level - 2) / 8.0 
+    normalized_value = np.clip(normalized_value, 0, 1)
+
+    # 対数スケール: 最小フィルタリング (Nyquist/1000) から最大フィルタリング (Nyquist)
+    min_log_ratio = np.log10(nyquist / 1000)
+    max_log_ratio = np.log10(nyquist)
+
+    # 対数的に補間し、カットオフ周波数を決定
+    log_cutoff = min_log_ratio + normalized_value * (min_log_ratio - max_log_ratio)
+    cutoff_freq = 10 ** log_cutoff
+    
+    # カットオフ周波数がナイキスト周波数以下であることを保証
+    cutoff_freq = min(cutoff_freq, nyquist)
+    
+    # 3. アナログフィルタ設計 (s-domain) とデジタル変換
+    order = 1 # バターワースフィルタの次数
+    
+    Wn_analog = 2 * np.pi * cutoff_freq 
+    b_analog, a_analog = butter(order, Wn_analog, btype='low', analog=True)
+    
+    b_digital, a_digital = bilinear(b_analog, a_analog, fs=sampling_rate)
+    
+    # 4. ゼロ位相フィルタリングの適用
+    filtered_data = filtfilt(b_digital, a_digital, data)
+    
+    return filtered_data
