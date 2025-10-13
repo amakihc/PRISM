@@ -122,6 +122,14 @@ class App(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+
+    style_file_path = os.path.join(os.path.dirname(__file__), 'src', 'style.qss')
+    try:
+        with open(style_file_path, 'r', encoding='utf-8') as f:
+            app.setStyleSheet(f.read())
+    except FileNotFoundError:
+        print("Style file not found. Continuing without custom styles.")
+
     window = App()
     window.show()
     sys.exit(app.exec_())
