@@ -74,7 +74,7 @@ class App(QMainWindow):
         raw_signal_data = self.df.iloc[:, data_column_index].values
         time_data = self.df.iloc[:, 0].values
 
-        # --- LPFフィルタリングの適用 ---
+        # LPFフィルタリングの適用
         lpf_level = self.current_lpf_level
         
         if lpf_level != 1: # スライダーがOFF(1)でなければフィルタ適用
@@ -119,7 +119,6 @@ class App(QMainWindow):
         self.current_lpf_level = value
         if self.df is not None:
             self.plot_selected_channel()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

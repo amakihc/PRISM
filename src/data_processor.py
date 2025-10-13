@@ -106,6 +106,11 @@ def apply_lpf(data, sampling_rate, lpf_level):
         return data
         
     nyquist = sampling_rate / 2
+
+    T = len(data) / sampling_rate
+    delta_f = 1.0 / T
+
+    min_cutoff = 5.0 * delta_f
     
     # 2. LPFレベルからカットオフ周波数 (cutoff_freq) を決定する
     
@@ -113,19 +118,20 @@ def apply_lpf(data, sampling_rate, lpf_level):
     normalized_value = (lpf_level - 2) / 8.0 
     normalized_value = np.clip(normalized_value, 0, 1)
 
-    # 対数スケール: 最小フィルタリング (Nyquist/1000) から最大フィルタリング (Nyquist)
-    min_log_ratio = np.log10(nyquist / 1000)
-    max_log_ratio = np.log10(nyquist)
+    # 対数スケール
+    min_log_ratio = np.log10(min_cutoff)
+    max_log_ratio = np.log10(nyquist / 10)
 
     # 対数的に補間し、カットオフ周波数を決定
-    log_cutoff = min_log_ratio + normalized_value * (min_log_ratio - max_log_ratio)
+    log_cutoff = max_log_ratio - normalized_value * (max_log_ratio - min_log_ratio)
     cutoff_freq = 10 ** log_cutoff
     
     # カットオフ周波数がナイキスト周波数以下であることを保証
     cutoff_freq = min(cutoff_freq, nyquist)
+
     
     # 3. アナログフィルタ設計 (s-domain) とデジタル変換
-    order = 1 # バターワースフィルタの次数
+    order = 4 # バターワースフィルタの次数
     
     Wn_analog = 2 * np.pi * cutoff_freq 
     b_analog, a_analog = butter(order, Wn_analog, btype='low', analog=True)
