@@ -1,0 +1,60 @@
+/* style.qss */
+
+/* アプリケーション全体の基盤 */
+QMainWindow, QWidget, QDialog {
+    background-color: #F8F9FA; /* 非常に明るいグレーの背景 */
+    color: #34495E; /* 濃い青グレーのテキスト */
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+}
+
+/* プッシュボタンのモダン化 */
+QPushButton {
+    background-color: #ECF0F1; /* 薄いグレーの背景 */
+    border: 1px solid #BDC3C7; /* 薄い枠線 */
+    border-radius: 4px;
+    padding: 5px 12px;
+    color: #2C3E50;
+}
+QPushButton:hover {
+    background-color: #DDE1E3;
+}
+QPushButton:pressed {
+    background-color: #BDC3C7;
+    border-style: inset;
+}
+
+/* ラベル (フォントを uniform に) */
+QLabel {
+    color: #34495E;
+}
+
+/* QSlider のモダン化 */
+QSlider::groove:horizontal {
+    border: 1px solid #BDC3C7;
+    height: 6px;
+    background: #ECF0F1;
+    border-radius: 3px;
+}
+QSlider::handle:horizontal {
+    background: #3498DB; /* 青いハンドル */
+    border: 1px solid #2980B9;
+    width: 12px;
+    margin: -3px 0;
+    border-radius: 6px;
+}
+
+/* QComboBox (ドロップダウン) */
+QComboBox {
+    border: 1px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px 5px;
+    background-color: white;
+}
+
+/* Matplotlib ツールバーの背景をアプリと統一 */
+QToolBar {
+    background-color: #F8F9FA;
+    border: none;
+    spacing: 5px;
+}
