@@ -28,13 +28,16 @@ class UILayout(QWidget):
         self.app_title_label.setFont(title_font)
         self.app_title_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-        self.app_title_label.setText(
-            "<span style='color: #3498DB;'>P</span>" # 鮮やかな青
-            "<span style='color: #2ECC71;'>R</span>" # 緑
-            "<span style='color: #F39C12;'>I</span>" # オレンジ
-            "<span style='color: #E74C3C;'>S</span>" # 赤
-            "<span style='color: #9B59B6;'>M</span>" # 紫
-        )
+        logo_html = """
+        <table cellspacing='0' cellpadding='0'><tr><td>
+        <img src='./src/icons/PRISM_App_Icon_1.png' height='30' style='vertical-align:middle;'>
+        </td><td style='padding-left: 5px;'>
+        <img src='./src/icons/PRISM_App_Icon_2.png' height='30' style='vertical-align:middle;'>
+        </td></tr></table>
+        """
+        self.app_title_label.setText(logo_html)
+        self.app_title_label.setFixedWidth(180)
+        self.app_title_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         # ファイル選択ボタンとラベル
         self.browse_button = QPushButton("Select CSV File")
