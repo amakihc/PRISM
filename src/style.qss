@@ -10,7 +10,7 @@ QMainWindow, QWidget, QDialog {
 
 /* プッシュボタンのモダン化 */
 QPushButton {
-    background-color: #ECF0F1; /* 薄いグレーの背景 */
+    background-color: white; /* 薄いグレーの背景 */
     border: 1px solid #BDC3C7; /* 薄い枠線 */
     border-radius: 4px;
     padding: 5px 12px;
@@ -44,12 +44,60 @@ QSlider::handle:horizontal {
     border-radius: 6px;
 }
 
-/* QComboBox (ドロップダウン) */
+/* QComboBox (ドロップダウン) - モダンなフラットデザインとホバー効果 */
 QComboBox {
-    border: 1px solid #BDC3C7;
-    border-radius: 4px;
-    padding: 2px 5px;
+    /* 外観のベース */
+    border: 1px solid #BDC3C7; /* 薄い枠線 */
+    border-radius: 4px; /* 角丸 */
     background-color: white;
+    color: #2C3E50;
+    min-height: 20px; /* 高さの固定 */
+    
+    /* 矢印アイコンのスペースを確保 */
+    padding: 2px 5px; 
+    padding-right: 25px; /* 矢印アイコンの描画スペースを確保 */
+}
+
+QComboBox:hover {
+    border: 1px solid #3498DB; /* ホバーで青い枠線 */
+    background-color: #ECF0F1; 
+}
+
+QComboBox:on { /* ドロップダウンが開いているとき */
+    border: 1px solid #3498DB;
+}
+
+/* ドロップダウンボタン部分のスタイル（矢印の描画領域） */
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px; /* 矢印の幅を確保 */
+    border-left-width: 1px;
+    border-left-color: #BDC3C7;
+    border-left-style: solid; /* 矢印との間に線を入れる */
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+/* 矢印アイコンのカスタマイズ (SVGを参照) */
+QComboBox::down-arrow {
+    /* プロジェクト内のSVGファイルを参照して矢印を描画 */
+    image: url(./src/icons/arrow_down_black.svg); 
+    width: 14px;
+    height: 14px;
+    
+    /* 枠線や背景を削除し、矢印アイコンのみを表示 */
+    border: none;
+    background: none;
+}
+
+/* ドロップダウンリスト（ポップアップメニュー）のスタイル */
+QComboBox QAbstractItemView {
+    border: 1px solid #BDC3C7;
+    border-radius: 5px; 
+    background: white;
+    selection-background-color: #34495E; /* 選択項目の濃い背景色 */
+    selection-color: white; /* 選択項目の白文字 */
 }
 
 /* Matplotlib ツールバーの背景をアプリと統一 */
