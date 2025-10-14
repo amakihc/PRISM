@@ -13,6 +13,7 @@ env/               # Virtual environment directories (common name)
 pip-log.txt
 dist/              # Distribution packaging
 build/             # Build directory
+*.spec
 
 # --- IDE and Editor Files ---
 .vscode/           # Visual Studio Code settings (Essential for you!)

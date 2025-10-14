@@ -13,7 +13,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from gui_layout import UILayout
 from data_processor import load_csv_data, compute_psd, apply_lpf
-import numpy as np
+
+__version__ = "1.0.0"
 
 class App(QMainWindow):
     """アプリケーションのメインウィンドウクラス"""
