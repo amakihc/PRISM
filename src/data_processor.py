@@ -124,10 +124,26 @@ def apply_lpf(data, sampling_rate, lpf_level):
 
     # 対数的に補間し、カットオフ周波数を決定
     log_cutoff = max_log_ratio - normalized_value * (max_log_ratio - min_log_ratio)
+    # 対数スケール: 最小フィルタリング (Nyquist/1000) から最大フィルタリング (Nyquist)
+    min_log_ratio = np.log10(nyquist / 1000)
+    max_log_ratio = np.log10(nyquist)
+
+    # 対数的に補間し、カットオフ周波数を決定
+    log_cutoff = min_log_ratio + normalized_value * (min_log_ratio - max_log_ratio)
+    # 対数スケール
+    min_log_ratio = np.log10(min_cutoff)
+    max_log_ratio = np.log10(nyquist / 10)
+
+    # 対数的に補間し、カットオフ周波数を決定
+    log_cutoff = max_log_ratio - normalized_value * (max_log_ratio - min_log_ratio)
     cutoff_freq = 10 ** log_cutoff
     
     # カットオフ周波数がナイキスト周波数以下であることを保証
     cutoff_freq = min(cutoff_freq, nyquist)
+
+    
+    # 3. アナログフィルタ設計 (s-domain) とデジタル変換
+    order = 4 # バターワースフィルタの次数
 
     
     # 3. アナログフィルタ設計 (s-domain) とデジタル変換
