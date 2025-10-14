@@ -22,21 +22,13 @@ class UILayout(QWidget):
     def create_widgets(self):
         """UIコンポーネントの作成と初期設定"""
         # アプリケーション名ラベル (PRISM)
-        self.app_title_label = QLabel("PRISM")
-        self.app_title_label.setFixedWidth(150) 
-        title_font = QFont("Helvetica", 24, QFont.Bold)
-        self.app_title_label.setFont(title_font)
-        self.app_title_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-
         logo_html = """
         <table cellspacing='0' cellpadding='0'><tr><td>
-        <img src='./src/icons/PRISM_App_Icon_1.png' height='30' style='vertical-align:middle;'>
-        </td><td style='padding-left: 5px;'>
-        <img src='./src/icons/PRISM_App_Icon_2.png' height='30' style='vertical-align:middle;'>
+        <img src='./src/icons/PRISM_App_Icon_2.png' height='40' style='vertical-align:middle;'>
         </td></tr></table>
         """
-        self.app_title_label.setText(logo_html)
-        self.app_title_label.setFixedWidth(180)
+        self.app_title_label = QLabel(logo_html)
+        # self.app_title_label.setFixedWidth(180)
         self.app_title_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         # ファイル選択ボタンとラベル
