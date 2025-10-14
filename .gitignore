@@ -8,11 +8,11 @@ Thumbs.db          # Windows thumbnail cache
 *.pyd
 *.so
 .env               # Virtual environment files (if named .env)
-venv/              # Virtual environment directories (common name)
-env/               # Virtual environment directories (common name)
+/venv/              # Virtual environment directories (common name)
+/env/               # Virtual environment directories (common name)
 pip-log.txt
-dist/              # Distribution packaging
-build/             # Build directory
+/dist/              # Distribution packaging
+/build/             # Build directory
 *.spec
 
 # --- IDE and Editor Files ---
