@@ -16,16 +16,22 @@ from data_processor import load_csv_data, compute_psd, apply_lpf
 
 __version__ = "1.0.0"
 
+def resource_path(relative_path):
+    """"PyInstallerでバンドルされたリソースへの絶対パスを解決するヘルパー関数"""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.dirname(__file__), relative_path)
+
 class App(QMainWindow):
     """アプリケーションのメインウィンドウクラス"""
     def __init__(self):
         super().__init__()
-        self.ui = UILayout()
+        self.ui = UILayout(self.app_resource_path)
         self.setCentralWidget(self.ui)
         self.setGeometry(100, 100, 1200, 600)
         self.setWindowTitle("PRISM")
 
-        icon_path = os.path.join(os.path.dirname(__file__), 'src', 'icons', 'PRISM_App_Icon.png')
+        icon_path = resource_path('src/icons/PRISM_App_Icon.ico')
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         else:
@@ -42,6 +48,11 @@ class App(QMainWindow):
 
         self.ui.lpf_slider.valueChanged.connect(self.update_lpf_cutoff)
         self.ui.avg_slider.valueChanged.connect(self.update_smoothing_level)
+
+    def app_resource_path(self, relative_path):
+        if hasattr(sys, '_MEIPASS'):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.dirname(__file__), relative_path)
 
     def update_smoothing_level(self, value):
         """スライドバーの値が変更されたときに呼び出される"""
@@ -131,12 +142,18 @@ class App(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    style_file_path = os.path.join(os.path.dirname(__file__), 'src', 'style.qss')
+    style_file_path = resource_path('src/style.qss')
     try:
-        with open(style_file_path, 'r', encoding='utf-8') as f:
-            app.setStyleSheet(f.read())
-    except FileNotFoundError:
-        print("Style file not found. Continuing without custom styles.")
+        if os.path.exists(style_file_path):
+            with open(style_file_path, "r", encoding="utf-8") as f:
+                qss_content = f.read()
+
+                url_path = resource_path('src/icons/arrow_down_black.svg').replace('\\', '/')
+
+                qss_content = qss_content.replace('url(CUSTOM_ARROW_PATH);', f'url({url_path});')
+                app.setStyleSheet(qss_content)
+    except Exception as e:
+        print(f"Error applying QSS: {e}")
 
     window = App()
     window.show()

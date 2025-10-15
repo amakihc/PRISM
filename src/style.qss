@@ -82,11 +82,9 @@ QComboBox::drop-down {
 /* 矢印アイコンのカスタマイズ (SVGを参照) */
 QComboBox::down-arrow {
     /* プロジェクト内のSVGファイルを参照して矢印を描画 */
-    image: url(./src/icons/arrow_down_black.svg); 
+    image: url(CUSTOM_ARROW_PATH); 
     width: 14px;
     height: 14px;
-    
-    /* 枠線や背景を削除し、矢印アイコンのみを表示 */
     border: none;
     background: none;
 }
