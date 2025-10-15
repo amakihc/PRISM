@@ -3,8 +3,6 @@
 import pandas as pd
 from scipy.signal import welch, butter, filtfilt, bilinear
 import numpy as np
-import csv
-import io
 
 def is_numeric_start(text):
     """文字列が数値（科学表記含む）で始まっているかチェックするヘルパー関数"""

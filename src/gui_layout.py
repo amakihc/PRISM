@@ -1,34 +1,44 @@
 # GUIレイアウト構築用モジュール
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QComboBox, QSizePolicy, QSlider
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt 
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
+import os
+
 class UILayout(QWidget):
     """PRISMアプリケーションのUIレイアウトを構築するクラス"""
-    def __init__(self):
+    def __init__(self, resource_path_func):
         super().__init__()
-        self.setWindowTitle("PRISM - GUI Prototype")
-        self.main_layout = QVBoxLayout()
-        self.setLayout(self.main_layout)
+        self._resource_path = resource_path_func
+        self.init_ui()
 
+    def init_ui(self):
+        self.main_layout = QVBoxLayout(self)
         self.create_widgets()
         self.add_widgets_to_layout()
 
     def create_widgets(self):
         """UIコンポーネントの作成と初期設定"""
         # アプリケーション名ラベル (PRISM)
-        logo_html = """
-        <table cellspacing='0' cellpadding='0'><tr><td>
-        <img src='./src/icons/PRISM_App_Icon_2.png' height='40' style='vertical-align:middle;'>
-        </td></tr></table>
-        """
-        self.app_title_label = QLabel(logo_html)
-        # self.app_title_label.setFixedWidth(180)
+        self.app_title_label = QLabel()
+        
+        logo_image_path = self._resource_path('src/icons/PRISM_App_Icon_2.png')
+
+        if os.path.exists(logo_image_path):
+            pixmap = QPixmap(logo_image_path)
+            if not pixmap.isNull():
+                self.app_title_label.setPixmap(pixmap.scaledToHeight(40, Qt.SmoothTransformation))
+                self.app_title_label.setFixedWidth(self.app_title_label.sizeHint().width())
+            else:
+                self.app_title_label.setText("PRISM")
+        else:
+            self.app_title_label.setText("PRISM")
+        
         self.app_title_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         # ファイル選択ボタンとラベル
