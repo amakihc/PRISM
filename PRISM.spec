@@ -1,10 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_dynamic_libs
+
+binaries_numpy = collect_dynamic_libs('numpy')
+binaries_scipy = collect_dynamic_libs('scipy')
 
 a = Analysis(
     ['app.py'],
     pathex=[],
-    binaries=[],
+    binaries=binaries_numpy + binaries_scipy,
     datas=[('src', 'src')],
     hiddenimports=['matplotlib.backends.backend_qt5agg', 'pandas', 'scipy', 'scipy.signal'],
     hookspath=[],

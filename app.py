@@ -14,7 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from gui_layout import UILayout
 from data_processor import load_csv_data, compute_psd, apply_lpf
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 def resource_path(relative_path):
     """"PyInstallerでバンドルされたリソースへの絶対パスを解決するヘルパー関数"""

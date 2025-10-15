@@ -1,2 +1,6 @@
 # PRISM
-*PRISM = Power-spectrum Rapid Inspection and Signal Monitor
+## 機能
+1. 時系列CSVファイルの読み込みとプロット
+2. 時系列プロットに対するローパスフィルタの適用
+3. 振幅スペクトル密度のプロット
+4. 振幅スペクトル密度の平均化の適用
